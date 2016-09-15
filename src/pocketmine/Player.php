@@ -1744,9 +1744,6 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
 		}
 
 		$nbt->lastPlayed = new LongTag("lastPlayed", floor(microtime(true) * 1000));
-		if($this->server->getAutoSave()){
-			$this->server->saveOfflinePlayerData($this->username, $nbt, true);
-		}
 
 		if(!isset($nbt->Hunger) or !isset($nbt->Health) or !isset($nbt->MaxHealth)){
 			$nbt->Hunger = new ShortTag("Hunger", 20);
@@ -1756,6 +1753,10 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
 		$this->food = $nbt["Hunger"];
 		$this->setMaxHealth($nbt["MaxHealth"]);
 		parent::setHealth(($nbt["Health"] <= 0) ? 20 : $nbt["Health"]);
+
+		if($this->server->getAutoSave()){
+			$this->server->saveOfflinePlayerData($this->username, $nbt, true);
+		}
 
 		parent::__construct($this->level->getChunk($nbt["Pos"][0] >> 4, $nbt["Pos"][2] >> 4, true), $nbt);
 		$this->loggedIn = true;
@@ -3142,6 +3143,7 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
 
 			$this->namedtag["playerGameType"] = $this->gamemode;
 			$this->namedtag["lastPlayed"] = new LongTag("lastPlayed", floor(microtime(true) * 1000));
+			$this->namedtag["Hunger"] = $this->food;
 
 			if($this->username != "" and $this->namedtag instanceof CompoundTag){
 				$this->server->saveOfflinePlayerData($this->username, $this->namedtag, $async);
