@@ -140,6 +140,8 @@ use pocketmine\utils\Utils;
 use pocketmine\utils\UUID;
 use pocketmine\utils\VersionString;
 
+use synapse\Synapse;
+
 /**
  * The class that manages everything
  */
@@ -276,6 +278,9 @@ class Server{
 	/** @var Config */
 	private $config;
 
+	/** @var Config */
+	private $advancedConfig;
+
 	/** @var Player[] */
 	private $players = [];
 
@@ -289,6 +294,9 @@ class Server{
 
 	/** @var Level */
 	private $levelDefault = \null;
+
+	/** @var Synapse */
+	protected $synapse = \null;
 
 	/**
 	 * @return string
@@ -351,6 +359,13 @@ class Server{
 	 */
 	public function getPluginPath(){
 		return $this->pluginPath;
+	}
+
+	/**
+	 * @return Synapse|null
+	 */
+	public function getSynapse(){
+		return $this->synapse;
 	}
 
 	/**
@@ -1201,6 +1216,16 @@ class Server{
 
 	/**
 	 * @param string $variable
+	 * @param mixed  $defaultValue
+	 *
+	 * @return mixed
+	 */
+	public function getAdvancedProperty($variable, $defaultValue = \null){
+		return $this->advancedConfig->getNested($variable) === \null ? $defaultValue : $this->advancedConfig->getNested($variable);
+	}
+
+	/**
+	 * @param string $variable
 	 * @param string $value
 	 */
 	public function setConfigString($variable, $value){
@@ -1449,6 +1474,13 @@ class Server{
 			}
 			$this->config = new Config($this->dataPath . "pocketmine.yml", Config::YAML, []);
 
+			$this->logger->info("Loading prismarine.yml...");
+			if(!\file_exists($this->dataPath . "prismarine.yml")){
+				$content = \file_get_contents($this->filePath . "src/pocketmine/resources/prismarine.yml");
+				@\file_put_contents($this->dataPath . "prismarine.yml", $content);
+			}
+			$this->advancedConfig = new Config($this->dataPath . "prismarine.yml", Config::YAML, []);
+
 			$this->logger->info("Loading server properties...");
 			$this->properties = new Config($this->dataPath . "server.properties", Config::PROPERTIES, [
 				"motd" => "Minecraft: PE Server",
@@ -1663,6 +1695,23 @@ class Server{
 			}
 
 			$this->enablePlugins(PluginLoadOrder::POSTWORLD);
+
+			$synapseConfig = (array) $this->getAdvancedProperty("synapse");
+			if(isset($synapseConfig["is-main-server"])) $synapseConfig["isMainServer"] = $synapseConfig["is-main-server"];
+			if(isset($synapseConfig["server-password"])) $synapseConfig["password"] = $synapseConfig["server-password"];
+			if($synapseConfig["enabled"]){
+				$this->synapse = new Synapse($this, $synapseConfig);
+				if($synapseConfig["disable-rak"]){
+					foreach($this->getNetwork()->getInterfaces() as $interfaz){
+						if($interfaz instanceof RakLibInterface){
+							$interfaz->shutdown();
+							$this->getNetwork()->unregisterInterface($interfaz);
+							$this->logger->notice("RakLib has been disabled by synapse.disable-rak property.");
+							break;
+						}
+					}
+				}
+			}
 
 			$this->start();
 		}catch(\Throwable $e){
@@ -1986,6 +2035,11 @@ class Server{
 			$this->getLogger()->debug("Saving properties");
 			$this->properties->save();
 
+			if($this->synapse !== null){
+				$this->getLogger()->debug("Stopping Synapse client");
+				$this->synapse->shutdown();
+			}
+
 			$this->getLogger()->debug("Closing console");
 			$this->console->shutdown();
 			$this->console->notify();
@@ -2256,6 +2310,9 @@ class Server{
 				$p->onUpdate($currentTick);
 			}
 		}
+
+		//Do synapse ticks
+		if($this->synapse !== null) $this->synapse->tick();
 
 		//Do level ticks
 		foreach($this->getLevels() as $level){

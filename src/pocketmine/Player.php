@@ -240,6 +240,10 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
 
 	protected $allowFlight = false;
 
+	protected $foodTime = 100000;
+	protected $foodDamageTime = 20;
+	protected $foodRegainTime = 80;
+
 	private $needACK = [];
 
 	private $batchedPackets = [];
@@ -791,6 +795,10 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
 			$pk->z = $pos->z;
 			$this->dataPacket($pk);
 		}
+		$this->foodEnabled = $this->server->getAdvancedProperty("hunger.enabled", true);
+		$this->foodTime = $this->server->getAdvancedProperty("hunger.time", 100000);
+		$this->foodDamageTime = $this->server->getAdvancedProperty("hunger.damage-time", 20);
+		$this->foodRegainTime = $this->server->getAdvancedProperty("hunger.regain-time", 80);
 	}
 
 	protected function orderChunks(){
@@ -1564,7 +1572,7 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
 				}
 			}
 
-			if($this->starvationTick >= 20) {
+			if($this->starvationTick >= $this->foodDamageTime) { //20
 				$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_CUSTOM, 1);
 				$this->attack(1, $ev);
 				$this->starvationTick = 0;
@@ -1581,12 +1589,12 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
 				}
 			}
 
-			if($this->foodUsageTime >= 100000 && $this->foodEnabled) {
-				$this->foodUsageTime -= 100000;
+			if($this->foodUsageTime >= $this->foodTime && $this->foodEnabled) {
+				$this->foodUsageTime -= $this->foodTime; //100000
 				$this->subtractFood(1);
 			}
 
-			if($this->foodTick >= 80) {
+			if($this->foodTick >= $this->foodRegainTime) { //80
 				if($this->getHealth() < $this->getMaxHealth() && $this->getFood() >= 18) {
 					$ev = new EntityRegainHealthEvent($this, 1, EntityRegainHealthEvent::CAUSE_EATING);
 					$this->heal(1, $ev);

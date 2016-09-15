@@ -1,0 +1,24 @@
+#Prismarine advanced configuration file
+
+hunger:
+ #Enable hunger system
+ enabled: true
+ #Food time. Default: 100000
+ time: 100000
+ #Damage time on empty hunger bar
+ damage-time: 20
+ #Regain time on full hunger bar
+ regain-time: 80
+
+synapse:
+ #If you want to use Synapse API or connect to a synapse server, enable this
+ enabled: false
+ server-ip: 127.0.0.1
+ server-port: 10305
+ #If this client is the lobby or the main server
+ is-main-server: false
+ server-password: 16bitlongkey
+ #Description of this client is the identifier of this client
+ description: "A Synapse client"
+ #Disable RakLib means that players can only join via Synapse
+ disable-rak: false
