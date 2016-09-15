@@ -1748,6 +1748,15 @@ class Player extends Human implements CommandSender, InventoryHolder, ChunkLoade
 			$this->server->saveOfflinePlayerData($this->username, $nbt, true);
 		}
 
+		if(!isset($nbt->Hunger) or !isset($nbt->Health) or !isset($nbt->MaxHealth)){
+			$nbt->Hunger = new ShortTag("Hunger", 20);
+			$nbt->Health = new ShortTag("Health", 20);
+			$nbt->MaxHealth = new ShortTag("MaxHealth", 20);
+		}
+		$this->food = $nbt["Hunger"];
+		$this->setMaxHealth($nbt["MaxHealth"]);
+		parent::setHealth(($nbt["Health"] <= 0) ? 20 : $nbt["Health"]);
+
 		parent::__construct($this->level->getChunk($nbt["Pos"][0] >> 4, $nbt["Pos"][2] >> 4, true), $nbt);
 		$this->loggedIn = true;
 		$this->server->addOnlinePlayer($this);
