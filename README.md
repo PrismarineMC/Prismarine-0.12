@@ -8,8 +8,8 @@ Introduction
 Prismarine-0.12 is a fork of **[PocketMine++](https://github.com/PrismarineMC/PocketMinePlusPlus-Legacy)** and most of the original code was written by **PocketMine Team** and our team a long time ago.<br>
 Some of the extended functionality that Prismarine offers:
 
-* Synapse Client support(TODO)
-* Hunger
+* Synapse Client support
+* Settingable Hunger support
 * More attributes and AttributeMap system
 
 However, Prismarine-0.12 still has a long way to go. We welcome contributions.
