@@ -71,7 +71,7 @@ namespace pocketmine {
 	use pocketmine\wizard\Installer;
 
 	const VERSION = '1.7.0';
-	const API_VERSION = "1.13.1";
+	const API_VERSION = "2.0.0";
 	const CODENAME = '棒糖 (Lollipop)';
 	const MINECRAFT_VERSION = "v0.12.1 alpha";
 	const MINECRAFT_VERSION_NETWORK = "0.12.1";
