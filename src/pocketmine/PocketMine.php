@@ -73,8 +73,8 @@ namespace pocketmine {
 	const VERSION = '1.7.0';
 	const API_VERSION = "2.0.0";
 	const CODENAME = '棒糖 (Lollipop)';
-	const MINECRAFT_VERSION = "v0.15.8 alpha";
-	const MINECRAFT_VERSION_NETWORK = "0.15.8";
+	const MINECRAFT_VERSION = ".v0.12.1 alpha";
+	const MINECRAFT_VERSION_NETWORK = "0.12.1";
 
 	/*
 	 * Startup code. Do not look at it, it may harm you.
