@@ -21,16 +21,7 @@
 
 namespace pocketmine\network\protocol;
 
-use pocketmine\utils\Binary;
-
-
-
-
-
-
-
-
-
+#include <rules/DataPacket.h>
 
 
 class PlayerActionPacket extends DataPacket{
@@ -43,13 +34,14 @@ class PlayerActionPacket extends DataPacket{
 
 	const ACTION_RELEASE_ITEM = 5;
 	const ACTION_STOP_SLEEPING = 6;
-	const ACTION_RESPAWN = 7;
+	const ACTION_SPAWN_SAME_DIMENSION = 7;
 	const ACTION_JUMP = 8;
 	const ACTION_START_SPRINT = 9;
 	const ACTION_STOP_SPRINT = 10;
 	const ACTION_START_SNEAK = 11;
 	const ACTION_STOP_SNEAK = 12;
-	const ACTION_DIMENSION_CHANGE = 13;
+	const ACTION_SPAWN_OVERWORLD = 13;
+	const ACTION_SPAWN_NETHER = 14;
 
 	public $eid;
 	public $action;
@@ -59,22 +51,22 @@ class PlayerActionPacket extends DataPacket{
 	public $face;
 
 	public function decode(){
-		$this->eid = Binary::readLong($this->get(8));
-		$this->action = (\PHP_INT_SIZE === 8 ? \unpack("N", $this->get(4))[1] << 32 >> 32 : \unpack("N", $this->get(4))[1]);
-		$this->x = (\PHP_INT_SIZE === 8 ? \unpack("N", $this->get(4))[1] << 32 >> 32 : \unpack("N", $this->get(4))[1]);
-		$this->y = (\PHP_INT_SIZE === 8 ? \unpack("N", $this->get(4))[1] << 32 >> 32 : \unpack("N", $this->get(4))[1]);
-		$this->z = (\PHP_INT_SIZE === 8 ? \unpack("N", $this->get(4))[1] << 32 >> 32 : \unpack("N", $this->get(4))[1]);
-		$this->face = (\PHP_INT_SIZE === 8 ? \unpack("N", $this->get(4))[1] << 32 >> 32 : \unpack("N", $this->get(4))[1]);
+		$this->eid = $this->getLong();
+		$this->action = $this->getInt();
+		$this->x = $this->getInt();
+		$this->y = $this->getInt();
+		$this->z = $this->getInt();
+		$this->face = $this->getInt();
 	}
 
 	public function encode(){
-		$this->buffer = \chr(self::NETWORK_ID); $this->offset = 0;;
-		$this->buffer .= Binary::writeLong($this->eid);
-		$this->buffer .= \pack("N", $this->action);
-		$this->buffer .= \pack("N", $this->x);
-		$this->buffer .= \pack("N", $this->y);
-		$this->buffer .= \pack("N", $this->z);
-		$this->buffer .= \pack("N", $this->face);
+		$this->reset();
+		$this->putLong($this->eid);
+		$this->putInt($this->action);
+		$this->putInt($this->x);
+		$this->putInt($this->y);
+		$this->putInt($this->z);
+		$this->putInt($this->face);
 	}
 
 }

@@ -21,17 +21,12 @@
 
 namespace pocketmine\network\protocol;
 
+#include <rules/DataPacket.h>
+
+#ifndef COMPILE
 use pocketmine\utils\Binary;
 
-
-
-
-
-
-
-
-
-
+#endif
 
 class AddEntityPacket extends DataPacket{
 	const NETWORK_ID = Info::ADD_ENTITY_PACKET;
@@ -46,7 +41,8 @@ class AddEntityPacket extends DataPacket{
 	public $speedZ;
 	public $yaw;
 	public $pitch;
-	public $metadata;
+	public $modifiers;
+	public $metadata = [];
 	public $links = [];
 
 	public function decode(){
@@ -54,24 +50,25 @@ class AddEntityPacket extends DataPacket{
 	}
 
 	public function encode(){
-		$this->buffer = \chr(self::NETWORK_ID); $this->offset = 0;;
-		$this->buffer .= Binary::writeLong($this->eid);
-		$this->buffer .= \pack("N", $this->type);
-		$this->buffer .= (\ENDIANNESS === 0 ? \pack("f", $this->x) : \strrev(\pack("f", $this->x)));
-		$this->buffer .= (\ENDIANNESS === 0 ? \pack("f", $this->y) : \strrev(\pack("f", $this->y)));
-		$this->buffer .= (\ENDIANNESS === 0 ? \pack("f", $this->z) : \strrev(\pack("f", $this->z)));
-		$this->buffer .= (\ENDIANNESS === 0 ? \pack("f", $this->speedX) : \strrev(\pack("f", $this->speedX)));
-		$this->buffer .= (\ENDIANNESS === 0 ? \pack("f", $this->speedY) : \strrev(\pack("f", $this->speedY)));
-		$this->buffer .= (\ENDIANNESS === 0 ? \pack("f", $this->speedZ) : \strrev(\pack("f", $this->speedZ)));
-		$this->buffer .= (\ENDIANNESS === 0 ? \pack("f", $this->yaw) : \strrev(\pack("f", $this->yaw)));
-		$this->buffer .= (\ENDIANNESS === 0 ? \pack("f", $this->pitch) : \strrev(\pack("f", $this->pitch)));
+		$this->reset();
+		$this->putLong($this->eid);
+		$this->putInt($this->type);
+		$this->putFloat($this->x);
+		$this->putFloat($this->y);
+		$this->putFloat($this->z);
+		$this->putFloat($this->speedX);
+		$this->putFloat($this->speedY);
+		$this->putFloat($this->speedZ);
+		$this->putFloat($this->yaw * 0.71111);
+		$this->putFloat($this->pitch * 0.71111);
+		$this->putInt($this->modifiers);
 		$meta = Binary::writeMetadata($this->metadata);
-		$this->buffer .= $meta;
-		$this->buffer .= \pack("n", \count($this->links));
+		$this->put($meta);
+		$this->putShort(count($this->links));
 		foreach($this->links as $link){
-			$this->buffer .= Binary::writeLong($link[0]);
-			$this->buffer .= Binary::writeLong($link[1]);
-			$this->buffer .= \chr($link[2]);
+			$this->putLong($link[0]);
+			$this->putLong($link[1]);
+			$this->putByte($link[2]);
 		}
 	}
 

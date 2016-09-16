@@ -1,20 +1,22 @@
 <?php
 
-/*                                                                             __
- *                                                                           _|  |_
- *  ____            _        _   __  __ _                  __  __ ____      |_    _|
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \    __ |__|  
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) | _|  |_  
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/ |_    _|
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|      |__|   
+/*
+ *
+ *  ____            _        _   __  __ _                  __  __ ____  
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \ 
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/ 
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_| 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine++ Team
- * @link http://pm-plus-plus.tk/
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
+ * 
+ *
 */
 
 /**
@@ -58,46 +60,46 @@ class QueryHandler{
 		$ev = $this->server->getQueryInformation();
 		$this->longData = $ev->getLongQuery();
 		$this->shortData = $ev->getShortQuery();
-		$this->timeout = \microtime(\true) + $ev->getTimeout();
+		$this->timeout = microtime(true) + $ev->getTimeout();
 	}
 
 	public function regenerateToken(){
 		$this->lastToken = $this->token;
-		$this->token = @Utils::getRandomBytes(16, \false);
+		$this->token = random_bytes(16);
 	}
 
 	public static function getTokenString($token, $salt){
-		return (\PHP_INT_SIZE === 8 ? \unpack("N", \substr(\hash("sha512", $salt . ":" . $token, \true), 7, 4))[1] << 32 >> 32 : \unpack("N", \substr(\hash("sha512", $salt . ":" . $token, \true), 7, 4))[1]);
+		return Binary::readInt(substr(hash("sha512", $salt . ":" . $token, true), 7, 4));
 	}
 
 	public function handle($address, $port, $packet){
 		$offset = 2;
-		$packetType = \ord($packet{$offset++});
-		$sessionID = (\PHP_INT_SIZE === 8 ? \unpack("N", \substr($packet, $offset, 4))[1] << 32 >> 32 : \unpack("N", \substr($packet, $offset, 4))[1]);
+		$packetType = ord($packet{$offset++});
+		$sessionID = Binary::readInt(substr($packet, $offset, 4));
 		$offset += 4;
-		$payload = \substr($packet, $offset);
+		$payload = substr($packet, $offset);
 
 		switch($packetType){
 			case self::HANDSHAKE: //Handshake
-				$reply = \chr(self::HANDSHAKE);
-				$reply .= \pack("N", $sessionID);
+				$reply = chr(self::HANDSHAKE);
+				$reply .= Binary::writeInt($sessionID);
 				$reply .= self::getTokenString($this->token, $address) . "\x00";
 
 				$this->server->getNetwork()->sendPacket($address, $port, $reply);
 				break;
 			case self::STATISTICS: //Stat
-				$token = (\PHP_INT_SIZE === 8 ? \unpack("N", \substr($payload, 0, 4))[1] << 32 >> 32 : \unpack("N", \substr($payload, 0, 4))[1]);
+				$token = Binary::readInt(substr($payload, 0, 4));
 				if($token !== self::getTokenString($this->token, $address) and $token !== self::getTokenString($this->lastToken, $address)){
 					break;
 				}
-				$reply = \chr(self::STATISTICS);
-				$reply .= \pack("N", $sessionID);
+				$reply = chr(self::STATISTICS);
+				$reply .= Binary::writeInt($sessionID);
 
-				if($this->timeout < \microtime(\true)){
+				if($this->timeout < microtime(true)){
 					$this->regenerateInfo();
 				}
 
-				if(\strlen($payload) === 8){
+				if(strlen($payload) === 8){
 					$reply .= $this->longData;
 				}else{
 					$reply .= $this->shortData;

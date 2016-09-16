@@ -21,31 +21,16 @@
 
 namespace pocketmine\network\protocol;
 
-#include <rules/DataPacket.h>
+class RequestChunkRadiusPacket extends DataPacket{
+	const NETWORK_ID = Info::REQUEST_CHUNK_RADIUS_PACKET;
 
-class ChangeDimensionPacket extends DataPacket{
-	const NETWORK_ID = Info::CHANGE_DIMENSION_PACKET;
-
-	const DIMENSION_NORMAL = 0;
-	const DIMENSION_NETHER = 1;
-
-	public $dimension;
-
-	public $x;
-	public $y;
-	public $z;
+	public $radius;
 
 	public function decode(){
-
+		$this->radius = $this->getInt();
 	}
 
 	public function encode(){
-		$this->reset();
-		$this->putByte($this->dimension);
-		$this->putFloat($this->x);
-		$this->putFloat($this->y);
-		$this->putFloat($this->z);
-		$this->putByte(0);
-	}
 
+	}
 }
