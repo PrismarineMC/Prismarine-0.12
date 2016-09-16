@@ -1,51 +1,39 @@
 <?php
 
-/*
- *
- *  _____   _____   __   _   _   _____  __    __  _____
- * /  ___| | ____| |  \ | | | | /  ___/ \ \  / / /  ___/
- * | |     | |__   |   \| | | | | |___   \ \/ /  | |___
- * | |  _  |  __|  | |\   | | | \___  \   \  /   \___  \
- * | |_| | | |___  | | \  | | |  ___| |   / /     ___| |
- * \_____/ |_____| |_|  \_| |_| /_____/  /_/     /_____/
+/*                                                                             __
+ *                                                                           _|  |_
+ *  ____            _        _   __  __ _                  __  __ ____      |_    _|
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \    __ |__|  
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) | _|  |_  
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/ |_    _|
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|      |__|   
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author iTX Technologies
- * @link https://itxtech.org
- *
- */
+ * @author PocketMine++ Team
+ * @link http://pm-plus-plus.tk/
+*/
 
 namespace pocketmine\network\protocol;
 
-#include <rules/DataPacket.h>
+use pocketmine\utils\Binary;
 
 class ChangeDimensionPacket extends DataPacket{
 	const NETWORK_ID = Info::CHANGE_DIMENSION_PACKET;
-
-	const DIMENSION_NORMAL = 0;
-	const DIMENSION_NETHER = 1;
-
-	public $dimension;
-
-	public $x;
-	public $y;
-	public $z;
-
-	public function decode(){
-
+	public $eid;
+	public $dimensionId;
+	public function decode() {
+		$this->dimensionId = (PHP_INT_SIZE === 8 ? \unpack("N", $this->get(4))[1] << 32 >> 32 : \unpack("N", $this->get(4))[1]);
 	}
-
-	public function encode(){
-		$this->reset();
-		$this->putByte($this->dimension);
-		$this->putFloat($this->x);
-		$this->putFloat($this->y);
-		$this->putFloat($this->z);
-		$this->putByte(0);
+	public function encode() {
+		$this->buffer = \chr(self::NETWORK_ID);
+		$this->offset = 0;
+		//$this->buffer .= \pack("NN", $this->eid >> 32, $this->eid & 0xFFFFFFFF);
+		//$this->buffer .= Binary::writeLong($this->eid);
+		//$this->buffer .= \chr($this->dimensionId);
+		$this->buffer .= \pack("N", $this->dimensionId);
 	}
-
 }

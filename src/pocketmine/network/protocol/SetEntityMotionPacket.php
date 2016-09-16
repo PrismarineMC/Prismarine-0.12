@@ -21,7 +21,16 @@
 
 namespace pocketmine\network\protocol;
 
-#include <rules/DataPacket.h>
+use pocketmine\utils\Binary;
+
+
+
+
+
+
+
+
+
 
 
 class SetEntityMotionPacket extends DataPacket{
@@ -42,13 +51,13 @@ class SetEntityMotionPacket extends DataPacket{
 	}
 
 	public function encode(){
-		$this->reset();
-		//$this->putInt(count($this->entities));
+		$this->buffer = \chr(self::NETWORK_ID); $this->offset = 0;;
+		$this->buffer .= \pack("N", \count($this->entities));
 		foreach($this->entities as $d){
-			$this->putLong($d[0]); //eid
-			$this->putFloat($d[1]); //motX
-			$this->putFloat($d[2]); //motY
-			$this->putFloat($d[3]); //motZ
+			$this->buffer .= Binary::writeLong($d[0]); //eid
+			$this->buffer .= (\ENDIANNESS === 0 ? \pack("f", $d[1]) : \strrev(\pack("f", $d[1]))); //motX
+			$this->buffer .= (\ENDIANNESS === 0 ? \pack("f", $d[2]) : \strrev(\pack("f", $d[2]))); //motY
+			$this->buffer .= (\ENDIANNESS === 0 ? \pack("f", $d[3]) : \strrev(\pack("f", $d[3]))); //motZ
 		}
 	}
 

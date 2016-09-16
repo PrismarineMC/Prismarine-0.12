@@ -21,7 +21,16 @@
 
 namespace pocketmine\network\protocol;
 
-#include <rules/DataPacket.h>
+use pocketmine\utils\Binary;
+
+
+
+
+
+
+
+
+
 
 
 class AddPaintingPacket extends DataPacket{
@@ -39,12 +48,12 @@ class AddPaintingPacket extends DataPacket{
 	}
 
 	public function encode(){
-		$this->reset();
-		$this->putLong($this->eid);
-		$this->putInt($this->x);
-		$this->putInt($this->y);
-		$this->putInt($this->z);
-		$this->putInt($this->direction);
+		$this->buffer = \chr(self::NETWORK_ID); $this->offset = 0;;
+		$this->buffer .= Binary::writeLong($this->eid);
+		$this->buffer .= \pack("N", $this->x);
+		$this->buffer .= \pack("N", $this->y);
+		$this->buffer .= \pack("N", $this->z);
+		$this->buffer .= \pack("N", $this->direction);
 		$this->putString($this->title);
 	}
 

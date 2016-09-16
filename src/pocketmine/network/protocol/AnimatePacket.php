@@ -21,7 +21,16 @@
 
 namespace pocketmine\network\protocol;
 
-#include <rules/DataPacket.h>
+use pocketmine\utils\Binary;
+
+
+
+
+
+
+
+
+
 
 
 class AnimatePacket extends DataPacket{
@@ -31,14 +40,14 @@ class AnimatePacket extends DataPacket{
 	public $eid;
 
 	public function decode(){
-		$this->action = $this->getByte();
-		$this->eid = $this->getLong();
+		$this->action = \ord($this->get(1));
+		$this->eid = Binary::readLong($this->get(8));
 	}
 
 	public function encode(){
-		$this->reset();
-		$this->putByte($this->action);
-		$this->putLong($this->eid);
+		$this->buffer = \chr(self::NETWORK_ID); $this->offset = 0;;
+		$this->buffer .= \chr($this->action);
+		$this->buffer .= Binary::writeLong($this->eid);
 	}
 
 }

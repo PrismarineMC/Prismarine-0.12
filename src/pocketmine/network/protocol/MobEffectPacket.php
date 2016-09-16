@@ -21,7 +21,16 @@
 
 namespace pocketmine\network\protocol;
 
-#include <rules/DataPacket.h>
+use pocketmine\utils\Binary;
+
+
+
+
+
+
+
+
+
 
 
 class MobEffectPacket extends DataPacket{
@@ -35,7 +44,7 @@ class MobEffectPacket extends DataPacket{
 	public $eventId;
 	public $effectId;
 	public $amplifier;
-	public $particles = true;
+	public $particles = \true;
 	public $duration;
 
 	public function decode(){
@@ -43,13 +52,13 @@ class MobEffectPacket extends DataPacket{
 	}
 
 	public function encode(){
-		$this->reset();
-		$this->putLong($this->eid);
-		$this->putByte($this->eventId);
-		$this->putByte($this->effectId);
-		$this->putByte($this->amplifier);
-		$this->putByte($this->particles ? 1 : 0);
-		$this->putInt($this->duration);
+		$this->buffer = \chr(self::NETWORK_ID); $this->offset = 0;;
+		$this->buffer .= Binary::writeLong($this->eid);
+		$this->buffer .= \chr($this->eventId);
+		$this->buffer .= \chr($this->effectId);
+		$this->buffer .= \chr($this->amplifier);
+		$this->buffer .= \chr($this->particles ? 1 : 0);
+		$this->buffer .= \pack("N", $this->duration);
 	}
 
 }

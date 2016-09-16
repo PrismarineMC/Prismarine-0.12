@@ -21,7 +21,16 @@
 
 namespace pocketmine\network\protocol;
 
-#include <rules/DataPacket.h>
+use pocketmine\utils\Binary;
+
+
+
+
+
+
+
+
+
 
 
 class EntityEventPacket extends DataPacket{
@@ -49,14 +58,14 @@ class EntityEventPacket extends DataPacket{
 	public $event;
 
 	public function decode(){
-		$this->eid = $this->getLong();
-		$this->event = $this->getByte();
+		$this->eid = Binary::readLong($this->get(8));
+		$this->event = \ord($this->get(1));
 	}
 
 	public function encode(){
-		$this->reset();
-		$this->putLong($this->eid);
-		$this->putByte($this->event);
+		$this->buffer = \chr(self::NETWORK_ID); $this->offset = 0;;
+		$this->buffer .= Binary::writeLong($this->eid);
+		$this->buffer .= \chr($this->event);
 	}
 
 }
